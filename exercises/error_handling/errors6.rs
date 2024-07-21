@@ -24,7 +24,7 @@ impl ParsePosNonzeroError {
         ParsePosNonzeroError::Creation(err)
     }
     // TODO: add another error conversion function here.
-    fn from_parseint(err: ParseIntError) -> ParsePosNonzeroError {
+    fn from_parseint(err:ParseIntError) -> ParsePosNonzeroError {
         ParsePosNonzeroError::ParseInt(err)
     }
 }
@@ -32,10 +32,16 @@ impl ParsePosNonzeroError {
 fn parse_pos_nonzero(s: &str) -> Result<PositiveNonzeroInteger, ParsePosNonzeroError> {
     // TODO: change this to return an appropriate error instead of panicking
     // when `parse()` returns an error.
-    let x: i64 = match s.parse(){
-        Ok(num) => num,
-        Err(_) => 1
-    };
+    // let x: i64 = s.parse::<ParsePosNonzeroError>().map_err(ParsePosNonzeroError::from_parseint).unwrap();
+    let mut x : i64 = 0;
+    match s.parse() {
+        Ok(num) => {
+            x = num
+        },
+        Err(err) => {
+            return Err(ParsePosNonzeroError::from_parseint(err));
+        }
+    }
     PositiveNonzeroInteger::new(x).map_err(ParsePosNonzeroError::from_creation)
 }
 
@@ -64,14 +70,14 @@ impl PositiveNonzeroInteger {
 mod test {
     use super::*;
 
-    // #[test]
-    // fn test_parse_error() {
-    //     // We can't construct a ParseIntError, so we have to pattern match.
-    //     assert!(matches!(
-    //         parse_pos_nonzero("not a number"),
-    //         Err(ParsePosNonzeroError::ParseInt(_))
-    //     ));
-    // }
+    #[test]
+    fn test_parse_error() {
+        // We can't construct a ParseIntError, so we have to pattern match.
+        assert!(matches!(
+            parse_pos_nonzero("not a number"),
+            Err(ParsePosNonzeroError::ParseInt(_))
+        ));
+    }
 
     #[test]
     fn test_negative() {
